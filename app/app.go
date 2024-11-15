@@ -4,6 +4,7 @@ import (
 	"context"
 	"fizzbuzz/fizzbuzz"
 	"fizzbuzz/pkg/apiresponse"
+	"fizzbuzz/pkg/storage"
 	"log"
 	"log/slog"
 	"net/http"
@@ -47,11 +48,18 @@ func New() App {
 func (a App) Run() {
 	ctx := context.Background()
 
+	store, err := storage.NewSQLiteStore(a.dbFile)
+	if err != nil {
+		slog.Error("Error while connecting to database", "dbfile", a.dbFile, "error", err)
+	}
+	defer store.Close()
+
 	mux := http.NewServeMux()
 	slog.Info("Server up and listening to", "addr", a.listenAddr)
 
 	mux.Handle("GET /health", LoggerMiddleware(http.HandlerFunc(Health)))
-	mux.Handle("GET /", LoggerMiddleware(RecoverMiddleware(fizzbuzz.Handler(ctx))))
+	mux.Handle("GET /", LoggerMiddleware(RecoverMiddleware(fizzbuzz.Handler(ctx, store))))
+	mux.Handle("GET /stat", LoggerMiddleware(RecoverMiddleware(fizzbuzz.StatHandler(ctx, store))))
 
 	srv := http.Server{
 		Addr:    a.listenAddr,

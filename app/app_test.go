@@ -35,7 +35,7 @@ func TestNew(t *testing.T) {
 func TestHealth(t *testing.T) {
 	req := httptest.NewRequest("GET", "/ping", nil)
 	w := httptest.NewRecorder()
-	Health(w, req)
+	LoggerMiddleware(RecoverMiddleware(http.HandlerFunc(Health))).ServeHTTP(w, req)
 	assert.Eq(t, w.Code, http.StatusOK)
 	assert.Eq(t, strings.Contains(w.Body.String(), "OK"), true)
 }

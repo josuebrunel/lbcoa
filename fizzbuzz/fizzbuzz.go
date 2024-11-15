@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fizzbuzz/pkg/apiresponse"
+	"fizzbuzz/pkg/storage"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -17,6 +18,8 @@ var (
 	ErrValMustBeInt    = errors.New("value must be an integer")
 	ErrValMustBeGTZero = errors.New("value must be greater than 0")
 	ErrValEmpty        = errors.New("value must not be empty")
+	SqlStmtUpsert      = `insert into stat (qs, hits) values (?, 1) on conflict do update set hits = hits + 1;`
+	SqlStmtQuery       = `select qs, hits from stat order by hits desc limit 1;`
 )
 
 type Args struct {
@@ -29,6 +32,11 @@ type Args struct {
 
 func (a Args) String() string {
 	return fmt.Sprintf("int1=%d&int2=%d&limit=%d&str1=%s&str2=%s", a.Int1, a.Int2, a.Limit, a.Str1, a.Str2)
+}
+
+type Stat struct {
+	Qs   string `json:"qs"`
+	Hits int    `json:"hits"`
 }
 
 // parseIntNValidate parses the given string to an integer and validates it.
@@ -96,14 +104,36 @@ func argsFromQuery(qs url.Values) (Args, error) {
 // Handler is the main handler for the fizzbuzz endpoint.
 // It parses the query parameters, validates them, and then calls the fizzBuzz function to generate the result.
 // It returns a JSON response with the result.  If there is an error, it returns a JSON response with the error.
-func Handler(ctx context.Context) http.HandlerFunc {
+func Handler(ctx context.Context, store storage.Storer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		args, err := argsFromQuery(r.URL.Query())
 		if err != nil {
 			apiresponse.New(w, http.StatusBadRequest, "", err)
 			return
 		}
+		// we only record successful requests
+		if _, err := store.Exec(ctx, SqlStmtUpsert, args.String()); err != nil {
+			slog.Error("Error while inserting stat", "error", err, "args", args)
+		}
 		apiresponse.New(w, http.StatusOK, fizzBuzz(ctx, args), nil)
+	}
+}
+
+// StatHandler is the handler for the /stat endpoint.
+// It retrieves the most frequent query string from the database and returns it as a JSON response.
+// If there is an error, it returns a JSON response with the error.
+func StatHandler(ctx context.Context, store storage.Storer) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var (
+			data = Stat{}
+		)
+		row, err := store.SelectOne(ctx, SqlStmtQuery)
+		if err != nil {
+			slog.Error("Error while querying stat", "error", err)
+		}
+		row.Scan(&data.Qs, &data.Hits)
+		slog.Info("Stat", "data", data, "error", err, "row", row)
+		apiresponse.New(w, http.StatusOK, data, err)
 	}
 }
 
