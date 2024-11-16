@@ -5,6 +5,7 @@ import (
 	_ "fizzbuzz/app/docs"
 	"fizzbuzz/fizzbuzz"
 	"fizzbuzz/pkg/apiresponse"
+	"fizzbuzz/pkg/migrations"
 	"fizzbuzz/pkg/storage"
 	"log"
 	"log/slog"
@@ -14,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/swaggo/http-swagger/v2"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 const (
@@ -70,6 +71,11 @@ func (a App) Run() {
 		slog.Error("Error while connecting to database", "dbfile", a.dbFile, "error", err)
 	}
 	defer store.Close()
+
+	// run migration
+	if _, err := store.Exec(ctx, migrations.InitSQL); err != nil {
+		slog.Error("Error while running migration", "error", err)
+	}
 
 	mux := http.NewServeMux()
 	slog.Info("Server up and listening to", "addr", a.listenAddr)
