@@ -1,0 +1,96 @@
+basePath: /
+definitions:
+  fizzbuzz_pkg_apiresponse.ApiResponse-string:
+    properties:
+      data:
+        type: string
+      error:
+        type: string
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://demo.com/support
+  description: FizzBuzz
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: demo.com
+  title: FizzBuzz Swagger UI
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: Returns a JSON response with FizzBuzz result
+      operationId: fizzbuzz
+      parameters:
+      - description: Int1
+        in: query
+        name: int1
+        required: true
+        type: integer
+      - description: Int2
+        in: query
+        name: int2
+        required: true
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: Str1
+        in: query
+        name: str1
+        required: true
+        type: string
+      - description: Str2
+        in: query
+        name: str2
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/fizzbuzz_pkg_apiresponse.ApiResponse-string'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/fizzbuzz_pkg_apiresponse.ApiResponse-string'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/fizzbuzz_pkg_apiresponse.ApiResponse-string'
+      summary: FizzBuzz
+      tags:
+      - fizzbuzz
+  /stat:
+    get:
+      consumes:
+      - application/json
+      description: Returns a JSON response of the query string with the most hits
+      operationId: fizzbuzz-stat
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fizzbuzz_pkg_apiresponse.ApiResponse-string'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/fizzbuzz_pkg_apiresponse.ApiResponse-string'
+      summary: Stat
+      tags:
+      - fizzbuzz
+schemes:
+- http
+- https
+swagger: "2.0"

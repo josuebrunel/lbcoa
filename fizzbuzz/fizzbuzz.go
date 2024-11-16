@@ -104,6 +104,21 @@ func argsFromQuery(qs url.Values) (Args, error) {
 // Handler is the main handler for the fizzbuzz endpoint.
 // It parses the query parameters, validates them, and then calls the fizzBuzz function to generate the result.
 // It returns a JSON response with the result.  If there is an error, it returns a JSON response with the error.
+// @Summary FizzBuzz
+// @Description  Returns a JSON response with FizzBuzz result
+// @ID fizzbuzz
+// @Tags fizzbuzz
+// @Accept json
+// @Produce json
+// @Param int1 query int true "Int1"
+// @Param int2 query int true "Int2"
+// @Param limit query int true "Limit"
+// @Param str1 query string true "Str1"
+// @Param str2 query string true "Str2"
+// @Success 201 {object} apiresponse.ApiResponse[string]
+// @Failure 400 {object} apiresponse.ApiResponse[string]
+// @Failure 500 {object} apiresponse.ApiResponse[string]
+// @Router / [get]
 func Handler(ctx context.Context, store storage.Storer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		args, err := argsFromQuery(r.URL.Query())
@@ -122,6 +137,15 @@ func Handler(ctx context.Context, store storage.Storer) http.HandlerFunc {
 // StatHandler is the handler for the /stat endpoint.
 // It retrieves the most frequent query string from the database and returns it as a JSON response.
 // If there is an error, it returns a JSON response with the error.
+// @Summary Stat
+// @Description  Returns a JSON response of the query string with the most hits
+// @ID fizzbuzz-stat
+// @Tags fizzbuzz
+// @Accept json
+// @Produce json
+// @Success 200 {object} apiresponse.ApiResponse[string]
+// @Failure 500 {object} apiresponse.ApiResponse[string]
+// @Router /stat [get]
 func StatHandler(ctx context.Context, store storage.Storer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var (

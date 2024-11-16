@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	_ "fizzbuzz/app/docs"
 	"fizzbuzz/fizzbuzz"
 	"fizzbuzz/pkg/apiresponse"
 	"fizzbuzz/pkg/storage"
@@ -12,6 +13,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/swaggo/http-swagger/v2"
 )
 
 const (
@@ -45,6 +48,20 @@ func New() App {
 }
 
 // Run runs the application.
+// @title FizzBuzz Swagger UI
+// @version 1.0
+// @description FizzBuzz
+// @contact.name API Support
+// @termsOfService demo.com
+// @contact.url http://demo.com/support
+// @contact.email support@swagger.io
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+// @BasePath /
+// @Schemes http https
+// @query.collection.format multi
+// @in header
+// @name Authorization
 func (a App) Run() {
 	ctx := context.Background()
 
@@ -60,6 +77,7 @@ func (a App) Run() {
 	mux.Handle("GET /health", LoggerMiddleware(http.HandlerFunc(Health)))
 	mux.Handle("GET /", LoggerMiddleware(RecoverMiddleware(fizzbuzz.Handler(ctx, store))))
 	mux.Handle("GET /stat", LoggerMiddleware(RecoverMiddleware(fizzbuzz.StatHandler(ctx, store))))
+	mux.Handle("GET /swagger/", http.StripPrefix("/swagger/", httpSwagger.Handler(httpSwagger.URL("doc.json"))))
 
 	srv := http.Server{
 		Addr:    a.listenAddr,
