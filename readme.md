@@ -19,3 +19,43 @@ Bonus: add a statistics endpoint allowing users to know what the most frequent r
 
 
 # Solution
+
+I went for a simple prod ready solution with very few dependencies (sqlite, sqlmock, swaggo). 
+
+## Quickstart
+
+### How to run tests
+
+```shell
+make test
+```
+
+### How to run the service
+
+```shell
+make run
+```
+
+### How to run wih docker
+
+```shell
+docker compose up -d fizzbuzz # port 8190 will be exposed
+```
+
+### How to play with the endpoints
+
+```shell
+curl -v "http://localhost:8191/?int1=3&int2=5&limit=20&str1=buzz&str2=feed" | jq
+```
+
+get the stats
+
+```shell
+curl -v "http://localhost:8191/stat" | jq
+```
+
+A swagger page is provided to easily play with the service. Go to 
+
+```
+http://localhost:<port>/swagger/
+```
