@@ -1,0 +1,33 @@
+services:
+    dev:
+      container_name: fizzbuzz-dev
+      tty: true
+      build:
+          context: .
+          dockerfile: Dockerfile
+          target: build
+      ports:
+          - "8191:8090"
+      networks:
+        - fizzbuzz
+      volumes:
+        - ./:/go/src/app/
+    fizzbuzz:
+      container_name: fizzbuzz
+      tty: true
+      build:
+          context: .
+          dockerfile: Dockerfile
+      ports:
+          - "8190:8090"
+      networks:
+        - fizzbuzz
+      volumes:
+        - data:/opt/fizzbuzz/
+networks:
+  fizzbuzz:
+    driver: bridge
+  
+volumes:
+  data:
+    name: fizzbuzz
