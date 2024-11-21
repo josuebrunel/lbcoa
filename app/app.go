@@ -69,12 +69,14 @@ func (a App) Run() {
 	store, err := storage.NewSQLiteStore(a.dbFile)
 	if err != nil {
 		slog.Error("Error while connecting to database", "dbfile", a.dbFile, "error", err)
+		return
 	}
 	defer store.Close()
 
 	// run migration
 	if _, err := store.Exec(ctx, migrations.InitSQL); err != nil {
 		slog.Error("Error while running migration", "error", err)
+		return
 	}
 
 	mux := http.NewServeMux()

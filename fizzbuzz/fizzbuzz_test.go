@@ -87,6 +87,8 @@ func TestFizzBuzz(t *testing.T) {
 		})
 	}
 	// test stat handler
+	store, _ = NewMockStorer()
+	defer store.Close()
 	t.Run("Stat", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/stat", nil)
 		w := httptest.NewRecorder()
@@ -96,5 +98,9 @@ func TestFizzBuzz(t *testing.T) {
 		assert.Eq(t, w.Code, 200)
 		resp := make(map[string]any)
 		_ = json.Unmarshal(w.Body.Bytes(), &resp)
+		t.Logf("resp: %v", resp)
+		assert.Eq(t, resp["error"].(string), "")
+		data := resp["data"].(map[string]any)
+		assert.Eq(t, data["hits"].(float64), 18)
 	})
 }
